@@ -444,8 +444,8 @@ void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount)
 
 void blur2d( CRGB* leds, uint16_t width, uint16_t height, fract8 blur_amount)
 {
-    blurRows(leds, width, height, blur_amount);
-    blurColumns(leds, width, height, blur_amount);
+    // blurRows(leds, width, height, blur_amount);
+    // blurColumns(leds, width, height, blur_amount);
 }
 
 void blurRows( CRGB* leds, uint16_t width, uint16_t height, fract8 blur_amount)
