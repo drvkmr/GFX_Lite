@@ -112,7 +112,7 @@ class GFX : public Print
     template<typename T>
     void setTextColor(T c) 
     {
-      if (std::is_same<T, CRGB>::value) {
+      if constexpr (std::is_same<T, CRGB>::value) {
               // if CRGB provided, cast to 16bit color format.
               textcolor = textbgcolor = CRGB_to_color565(c);
       } 
@@ -133,7 +133,7 @@ class GFX : public Print
     template<typename T>    
     void setTextColor(T c, T bg) 
     {
-      if (std::is_same<T, CRGB>::value) {
+      if constexpr (std::is_same<T, CRGB>::value) {
               textcolor   = CRGB_to_color565(c);    // From parent class
               textbgcolor = CRGB_to_color565(bg);
       } 
