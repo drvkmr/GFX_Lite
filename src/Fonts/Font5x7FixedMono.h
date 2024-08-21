@@ -4,6 +4,7 @@
 *
 * Author Rob Jennings
 */
+#pragma once
 
 const uint8_t FixedMono5x7Bitmaps[] PROGMEM = {
   0xFA, 0xB4, 0x52, 0xBE, 0xAF, 0xA9, 0x40, 0x23, 0xE8, 0xE2, 0xF8, 0x80,
@@ -141,4 +142,4 @@ const GFXglyph FixedMono5x7Glyphs[] PROGMEM = {
 const GFXfont Font5x7FixedMono PROGMEM = {
 (uint8_t  *)FixedMono5x7Bitmaps,
 (GFXglyph *)FixedMono5x7Glyphs,
-0x20, 0x7E, 7};
+0x20, 0x7E, 8};
