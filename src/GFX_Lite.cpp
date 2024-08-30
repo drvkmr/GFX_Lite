@@ -425,6 +425,46 @@ template void GFX::fillCircleHelper<uint16_t>(int16_t x0, int16_t y0, int16_t r,
 
 /**************************************************************************/
 /*!
+   @brief   Draw an ellipse with specified parameters
+    @param    x       Center x coordinate
+    @param    y       Center y coordinate
+    @param    rad     Radius of the ellipse
+    @param    length  Length of the ellipse
+    @param    angle   Rotation angle in radians
+    @param    color   Color to draw with
+*/
+/**************************************************************************/
+template<typename T>
+void GFX::drawCircleArray(int16_t x, int16_t y, int16_t rad, int16_t length, float angle, T color) {
+    // Calculate the rotation angle in radians
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
+
+    int16_t _rad, _length;
+    _rad = min(rad, length);
+    _length = max(rad, length);
+
+    // Calculate the step size and number of circles based on the rectangle's dimensions
+    int numCircles = max(_rad, static_cast<int16_t>(_length / 2)); // Adjust the divisor to control circle density
+    for (int i = -numCircles; i <= numCircles; i++) {
+        float dx = i * -sinAngle;
+        float dy = i * cosAngle;
+
+        // Calculate circle center
+        int16_t circleX = x + dx;
+        int16_t circleY = y + dy;
+
+        // Draw circle
+        fillCircle(circleX, circleY, _rad, color);
+    }
+}
+
+template void GFX::drawCircleArray<CRGB>(int16_t x, int16_t y, int16_t rad, int16_t length, float angle, CRGB color);
+template void GFX::drawCircleArray<uint16_t>(int16_t x, int16_t y, int16_t rad, int16_t length, float angle, uint16_t color);
+
+
+/**************************************************************************/
+/*!
    @brief   Draw a rectangle with no fill color
     @param    x   Top left corner x coordinate
     @param    y   Top left corner y coordinate

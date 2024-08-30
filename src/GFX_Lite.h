@@ -51,6 +51,8 @@ class GFX : public Print
     template<typename T>
     void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, T color);
     template<typename T>
+    void drawCircleArray(int16_t x, int16_t y, int16_t rad, int16_t length, float angle, T color);
+    template<typename T>
     void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, T color);
     template<typename T>
     void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, T color);
