@@ -117,6 +117,9 @@ class GFX_Layer : public GFX
         uint16_t getWidth() { return _width; }
         uint16_t getHeight() { return _height; }
 
+        void reduceBrightness(uint8_t value);
+
+
 
     private:
     
@@ -165,6 +168,7 @@ public:
     void Stack(GFX_Layer &_bgLayer, GFX_Layer &_fgLayer, bool writeToBgLayer = false);
     void Siloette(GFX_Layer &_bgLayer, GFX_Layer &_fgLayer);
     void Blend(GFX_Layer &_bgLayer, GFX_Layer &_fgLayer, uint8_t ratio = 127);    
+    void StackWithThreshold(GFX_Layer& _bgLayer, GFX_Layer& _fgLayer, uint8_t threshold = 0, bool writeBackToBg = false);
 
 };
 
