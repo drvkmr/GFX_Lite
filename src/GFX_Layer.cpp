@@ -203,7 +203,23 @@ void GFX_Layer::reduceBrightness(uint8_t value) {
 }
 
 GFX_Layer::~GFX_Layer(void) {
-  free(pixels);
+  if (pixels) {
+    if (pixels->data) {
+#if (defined(ESP32) || defined(ESP_PLATFORM)) && defined(BOARD_HAS_PSRAM)
+      for (int i = 0; i < _height; i++) {
+        if (pixels->data[i]) heap_caps_free(pixels->data[i]);
+      }
+      heap_caps_free(pixels->data);
+#else
+      for (int i = 0; i < _height; i++) {
+        delete[] pixels->data[i];
+      }
+      delete[] pixels->data;
+#endif
+    }
+    delete pixels;
+    pixels = nullptr;
+  }
 }
 
 /* Merge FastLED layers into a super layer and display. Definition */

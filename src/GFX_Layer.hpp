@@ -19,9 +19,19 @@
 #define DISPLAY_MATRIX_LAYER
 
 #include <functional>
+#include <string.h>
 #include "GFX_Lite.h"
 
+#if defined(ESP32) || defined(ESP_PLATFORM)
+#include <esp_heap_caps.h>
+#endif
+
 #define BLACK_BACKGROUND_PIXEL_COLOUR CRGB(0,0,0)
+
+// GFX_Layer allocates its pixel buffer in PSRAM when available
+// (ESP32 with -DBOARD_HAS_PSRAM), falling back to internal RAM.
+// The pixel buffer is a row-major CRGB array accessed as pixels->data[y][x].
+// It is only touched from regular task contexts (never ISR), so PSRAM is safe.
 
 enum textPosition { TOP, MIDDLE, BOTTOM };
 
@@ -45,11 +55,48 @@ class GFX_Layer : public GFX
             pixels = new layerPixels();
             pixels->width = _width;
             pixels->height = _height;
+
+#if (defined(ESP32) || defined(ESP_PLATFORM)) && defined(BOARD_HAS_PSRAM)
+            // Row pointer table: prefer PSRAM, fall back to internal RAM.
+            pixels->data = (CRGB**)heap_caps_malloc(
+                _height * sizeof(CRGB*),
+                MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+            if (pixels->data == nullptr) {
+                pixels->data = (CRGB**)heap_caps_malloc(
+                    _height * sizeof(CRGB*),
+                    MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+            }
+            _rows_in_psram = true; // best-effort; tracked only for logging
+
+            for (int i = 0; i < _height; i++) {
+                CRGB* row = (CRGB*)heap_caps_malloc(
+                    _width * sizeof(CRGB),
+                    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+                if (row == nullptr) {
+                    row = (CRGB*)heap_caps_malloc(
+                        _width * sizeof(CRGB),
+                        MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+                    _rows_in_psram = false;
+                }
+                if (row != nullptr) {
+                    memset(row, 0, _width * sizeof(CRGB));
+                }
+                pixels->data[i] = row;
+            }
+
+            Serial.printf(
+                "[GFX_Layer] Allocated %ux%u pixel buffer (%u bytes) in %s\r\n",
+                (unsigned)_width, (unsigned)_height,
+                (unsigned)(_width * _height * sizeof(CRGB)),
+                _rows_in_psram ? "PSRAM" : "internal RAM");
+#else
             pixels->data = new CRGB*[_height];
             for (int i = 0; i < _height; i++) {
                 pixels->data[i] = new CRGB[_width];
+                memset(pixels->data[i], 0, _width * sizeof(CRGB));
             }
             Serial.printf("Allocated memory for layerPixels: %d x %d\r\n", _width, _height);
+#endif
         }
 
         void drawPixel(int16_t x, int16_t y, CRGB color) {				// overwrite GFX_Lite implementation	
@@ -127,6 +174,10 @@ class GFX_Layer : public GFX
         uint16_t _height;    
         // Member variable to store the callback
         std::function<void(int16_t, int16_t, uint8_t, uint8_t, uint8_t)> callback;
+
+#if (defined(ESP32) || defined(ESP_PLATFORM)) && defined(BOARD_HAS_PSRAM)
+        bool _rows_in_psram = false;
+#endif
 
 };
 
